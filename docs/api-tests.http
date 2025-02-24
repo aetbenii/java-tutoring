@@ -1,0 +1,114 @@
+# Floor Resource Operations
+### Get all floors
+GET http://localhost:8080/api/floors
+
+### Get specific floor
+GET http://localhost:8080/api/floors/1
+
+### Create new floor
+POST http://localhost:8080/api/floors
+Content-Type: application/json
+
+{
+    "name": "First Floor",
+    "floorNumber": 1
+}
+
+### Update floor
+PUT http://localhost:8080/api/floors/1
+Content-Type: application/json
+
+{
+    "name": "Updated First Floor",
+    "floorNumber": 1
+}
+
+### Delete floor
+DELETE http://localhost:8080/api/floors/1
+
+# Room Resource Operations
+### Get specific room with seats
+GET http://localhost:8080/api/rooms/1
+
+### Get room seats
+GET http://localhost:8080/api/rooms/1/seats
+
+### Create new room
+POST http://localhost:8080/api/rooms
+Content-Type: application/json
+
+{
+    "name": "Conference Room",
+    "roomNumber": "101",
+    "floor": {"id": 1}
+}
+
+### Update room
+PUT http://localhost:8080/api/rooms/1
+Content-Type: application/json
+
+{
+    "name": "Updated Conference Room",
+    "roomNumber": "101",
+    "floor": {"id": 1}
+}
+
+### Delete room
+DELETE http://localhost:8080/api/rooms/1
+
+# Seat Resource Operations
+### Get specific seat
+GET http://localhost:8080/api/seats/1
+
+### Create new seat
+POST http://localhost:8080/api/seats
+Content-Type: application/json
+
+{
+    "seatNumber": "101-A1",
+    "room": {"id": 1}
+}
+
+### Update seat
+PUT http://localhost:8080/api/seats/1
+Content-Type: application/json
+
+{
+    "seatNumber": "101-A2",
+    "room": {"id": 1}
+}
+
+### Delete seat
+DELETE http://localhost:8080/api/seats/1
+
+# Employee Resource Operations
+### Get specific employee with seat information
+GET http://localhost:8080/api/employees/1
+
+### Get employee's seats
+GET http://localhost:8080/api/employees/1/seats
+
+### Create new employee
+POST http://localhost:8080/api/employees
+Content-Type: application/json
+
+{
+    "fullName": "John Doe",
+    "occupation": "Software Engineer"
+}
+
+### Assign seat to employee
+PUT http://localhost:8080/api/employees/1/assign-seat/1
+
+### Unassign seat from employee
+DELETE http://localhost:8080/api/employees/1/unassign-seat/1
+
+### Search employees with pagination and filtering
+GET http://localhost:8080/api/employees/search?search=engineer&page=0&size=10
+
+### Search employees - empty search term (returns all with pagination)
+GET http://localhost:8080/api/employees/search?page=0&size=5
+
+# Statistics Operations
+### Get office statistics
+GET http://localhost:8080/api/stats

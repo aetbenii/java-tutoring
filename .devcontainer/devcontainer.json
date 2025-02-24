@@ -1,0 +1,28 @@
+{
+  "name": "Devbox Remote Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/tutoring",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "java.server.launchMode": "Standard",
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.compile.nullAnalysis.mode": "automatic"
+      },
+      "extensions": [
+        "jetpack-io.devbox",
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test",
+        "vscjava.vscode-maven",
+        "redhat.java",
+        "ms-azuretools.vscode-docker",
+        "ckolkman.vscode-postgres",
+        "humao.rest-client"
+      ]
+    }
+  },
+  "remoteUser": "devbox",
+  "postCreateCommand": "until pg_isready -h db -U postgres; do sleep 1; done && PGPASSWORD=postgres psql -h db -U postgres -f .devcontainer/schema.sql"
+}
