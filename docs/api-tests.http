@@ -1,9 +1,18 @@
+# Office Management System API Documentation
+# Supports many-to-many relationships between employees and seats:
+# - Multiple employees can be assigned to a single seat
+# - Each employee can be assigned multiple seats
+# - All relationships are managed bidirectionally
+# - Proper validation prevents deleting seats with assigned employees
+
 # Floor Resource Operations
 ### Get all floors
 GET http://localhost:8080/api/floors
+# Response includes: list of floors with basic info
 
 ### Get specific floor
 GET http://localhost:8080/api/floors/1
+# Response includes: floor details and associated rooms
 
 ### Create new floor
 POST http://localhost:8080/api/floors
@@ -25,13 +34,16 @@ Content-Type: application/json
 
 ### Delete floor
 DELETE http://localhost:8080/api/floors/1
+# Will fail if floor has any rooms
 
 # Room Resource Operations
 ### Get specific room with seats
 GET http://localhost:8080/api/rooms/1
+# Response includes: room details, seats, and employees assigned to each seat
 
 ### Get room seats
 GET http://localhost:8080/api/rooms/1/seats
+# Response includes: list of seats with their assigned employees
 
 ### Create new room
 POST http://localhost:8080/api/rooms
@@ -55,10 +67,22 @@ Content-Type: application/json
 
 ### Delete room
 DELETE http://localhost:8080/api/rooms/1
+# Will fail if room has any seats
 
 # Seat Resource Operations
 ### Get specific seat
-GET http://localhost:8080/api/seats/1
+GET http://localhost:8080/api/seats/245
+# Response includes: seat details and list of assigned employees
+# Response example:
+# {
+#   "id": 1,
+#   "seatNumber": "101-A1",
+#   "room": { "id": 1, "name": "Conference Room" },
+#   "employees": [
+#     { "id": 1, "fullName": "John Doe", "occupation": "Developer" },
+#     { "id": 2, "fullName": "Jane Smith", "occupation": "Designer" }
+#   ]
+# }
 
 ### Create new seat
 POST http://localhost:8080/api/seats
@@ -80,13 +104,26 @@ Content-Type: application/json
 
 ### Delete seat
 DELETE http://localhost:8080/api/seats/1
+# Will fail with 400 Bad Request if seat has any assigned employees
 
 # Employee Resource Operations
 ### Get specific employee with seat information
 GET http://localhost:8080/api/employees/1
+# Response includes: employee details and list of assigned seats
+# Response example:
+# {
+#   "id": 1,
+#   "fullName": "John Doe",
+#   "occupation": "Software Engineer",
+#   "seats": [
+#     { "id": 1, "seatNumber": "101-A1", "room": { "id": 1, "name": "Conference Room" } },
+#     { "id": 2, "seatNumber": "102-B1", "room": { "id": 2, "name": "Open Space" } }
+#   ]
+# }
 
 ### Get employee's seats
 GET http://localhost:8080/api/employees/1/seats
+# Response includes: list of seats assigned to the employee
 
 ### Create new employee
 POST http://localhost:8080/api/employees
@@ -99,12 +136,22 @@ Content-Type: application/json
 
 ### Assign seat to employee
 PUT http://localhost:8080/api/employees/1/assign-seat/1
+# Adds the seat to employee's seats collection
+# Multiple seats can be assigned to the same employee
+# Multiple employees can be assigned to the same seat
 
 ### Unassign seat from employee
 DELETE http://localhost:8080/api/employees/1/unassign-seat/1
+# Removes the seat from employee's seats collection
+# Other employees assigned to the seat are not affected
 
 ### Search employees with pagination and filtering
 GET http://localhost:8080/api/employees/search?search=engineer&page=0&size=10
+# Response includes:
+# - Paginated list of employees matching the search term
+# - Each employee includes their assigned seats
+# - Total count of matching employees
+# - Page information
 
 ### Search employees - empty search term (returns all with pagination)
 GET http://localhost:8080/api/employees/search?page=0&size=5
@@ -112,3 +159,10 @@ GET http://localhost:8080/api/employees/search?page=0&size=5
 # Statistics Operations
 ### Get office statistics
 GET http://localhost:8080/api/stats
+# Response includes:
+# - Total number of employees
+# - Total number of seats
+# - Total number of rooms
+# - Total number of floors
+# - Number of occupied seats (seats with at least one employee)
+# - Number of unoccupied seats
