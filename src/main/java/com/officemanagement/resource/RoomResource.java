@@ -88,7 +88,7 @@ public class RoomResource {
             OfficeRoom room = session.createQuery(
                 "select distinct r from OfficeRoom r " +
                 "left join fetch r.seats s " +
-                "left join fetch s.employee " +
+                "left join fetch s.employees " +
                 "where r.id = :id", OfficeRoom.class)
                 .setParameter("id", id)
                 .uniqueResult();
