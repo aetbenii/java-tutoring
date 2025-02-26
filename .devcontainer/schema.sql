@@ -52,6 +52,12 @@ CREATE TABLE seats (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE employee_seats (
+    employee_id BIGINT REFERENCES employees(id),
+    seat_id BIGINT REFERENCES seats(id),
+    PRIMARY KEY (employee_id, seat_id)
+);
+
 -- Insert sample data in correct order
 -- 1. First, insert floors
 INSERT INTO floors (floor_number, name) VALUES

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class EmployeeTest {
@@ -56,8 +55,9 @@ class EmployeeTest {
         employee.addSeat(seat);
         
         assertTrue(employee.getSeats().contains(seat));
-        assertEquals(employee, seat.getEmployee());
-    }
+        // assertEquals(employee, seat.getEmployees());
+        assertTrue(seat.getEmployees().contains(employee));
+}
 
     @Test
     void testRemoveSeat() {
@@ -66,7 +66,8 @@ class EmployeeTest {
         employee.removeSeat(seat);
         
         assertFalse(employee.getSeats().contains(seat));
-        assertNull(seat.getEmployee());
+        // assertNull(seat.getEmployees());
+        assertTrue(seat.getEmployees().isEmpty());
     }
 
     @Test

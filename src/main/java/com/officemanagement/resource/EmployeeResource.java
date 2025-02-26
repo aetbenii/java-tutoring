@@ -67,6 +67,7 @@ public class EmployeeResource {
             if (employee == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+            System.out.println(employee.getSeats());
             return Response.ok(employee).build();
         }
     }
@@ -132,9 +133,13 @@ public class EmployeeResource {
             }
 
             // Check if seat is already occupied
-            if (seat.getEmployee() != null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("Seat is already occupied").build();
-            }
+            // if (!seat.getEmployees().isEmpty()) {
+            //     return Response.status(Response.Status.BAD_REQUEST).entity("Seat is already occupied").build();
+            // }
+
+            // if (seat.getEmployees().stream().anyMatch(e -> e.getId().equals(employeeId))) {
+            //     return Response.status(Response.Status.BAD_REQUEST).entity("Seat is already occupied").build();
+            // }
 
             // Add seat to employee's seats
             employee.addSeat(seat);
@@ -166,12 +171,14 @@ public class EmployeeResource {
             }
 
             // Check if this seat belongs to the employee
-            if (seat.getEmployee() == null || !seat.getEmployee().getId().equals(employeeId)) {
+            if (!seat.getEmployees().stream().anyMatch(e -> e.getId().equals(employeeId))) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("This seat is not assigned to the employee").build();
             }
 
             // Just set the employee reference to null instead of removing the seat
-            seat.setEmployee(null);
+            // seat.setEmployee(null);
+            employee.removeSeat(seat);
+            System.out.println(employee.getSeats()+" , "+seat.getEmployees()+" , "+seat.getEmployees().size());
             session.update(seat);
             
             session.getTransaction().commit();
