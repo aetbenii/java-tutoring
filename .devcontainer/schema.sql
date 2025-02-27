@@ -4,6 +4,7 @@ CREATE DATABASE office_management;
 \c office_management;
 
 -- Drop tables if they exist (in correct order due to foreign keys)
+DROP TABLE IF EXISTS employee_seats;
 DROP TABLE IF EXISTS seats;
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS office_rooms;
