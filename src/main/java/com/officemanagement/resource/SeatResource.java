@@ -157,7 +157,7 @@ public class SeatResource {
             }
             
             // Check if seat is assigned to an employee
-            if (seat.getEmployee() != null) {
+            if (seat.getEmployees() != null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Cannot delete seat that is assigned to an employee")
                     .build();

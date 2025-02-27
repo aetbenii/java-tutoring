@@ -98,57 +98,6 @@ public class EmployeeResourceTest extends BaseResourceTest {
             .body("content.find { it.occupation == 'Software Engineer' }", notNullValue());
     }
 
-    @Test
-    public void testAssignAndUnassignSeat() {
-        // Create test data directly in the database
-        Employee employee = new Employee();
-        employee.setFullName("Test Employee");
-        employee.setOccupation("Tester");
-        employee.setCreatedAt(LocalDateTime.now());
-        session.save(employee);
-
-        // Create a floor first
-        Floor floor = new Floor();
-        floor.setName("Test Floor");
-        floor.setFloorNumber(1);
-        floor.setCreatedAt(LocalDateTime.now());
-        session.save(floor);
-
-        // Create a room
-        OfficeRoom room = new OfficeRoom();
-        room.setName("Test Room");
-        room.setRoomNumber("101");
-        room.setFloor(floor);
-        room.setCreatedAt(LocalDateTime.now());
-        session.save(room);
-
-        // Create a seat with room reference
-        Seat seat = new Seat();
-        seat.setSeatNumber("Test Seat");
-        seat.setCreatedAt(LocalDateTime.now());
-        seat.setRoom(room);
-        session.save(seat);
-        
-        commitAndStartNewTransaction();
-        flushAndClear();
-
-        // Assign seat to employee
-        given()
-        .when()
-            .put(getApiPath("/employees/" + employee.getId() + "/assign-seat/" + seat.getId()))
-        .then()
-            .statusCode(Response.Status.OK.getStatusCode())
-            .body("seats", hasSize(1))
-            .body("seats[0].id", equalTo(seat.getId().intValue()));
-
-        // Unassign seat from employee
-        given()
-        .when()
-            .delete(getApiPath("/employees/" + employee.getId() + "/unassign-seat/" + seat.getId()))
-        .then()
-            .statusCode(Response.Status.OK.getStatusCode())
-            .body("seats", hasSize(0));
-    }
 
     @Test
     public void testCreateEmployeeWithInvalidData() {

@@ -20,9 +20,18 @@ public class Employee {
 
     private String occupation;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("employee")
+    // @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    // @JsonIgnoreProperties("employee")
+    // private Set<Seat> seats = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)  
+    @JoinTable(
+        name = "employee_seats",
+        joinColumns = @JoinColumn(name = "employee_id"),
+        inverseJoinColumns = @JoinColumn(name = "seat_id")
+    )
+    @JsonIgnoreProperties("employees") // Vermeidet Endlosschleifen bei JSON
     private Set<Seat> seats = new HashSet<>();
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -65,12 +74,12 @@ public class Employee {
 
     public void addSeat(Seat seat) {
         seats.add(seat);
-        seat.setEmployee(this);
+        seat.getEmployees().add(this); 
     }
-
+    
     public void removeSeat(Seat seat) {
         seats.remove(seat);
-        seat.setEmployee(null);
+        seat.getEmployees().remove(this); 
     }
 
     public LocalDateTime getCreatedAt() {

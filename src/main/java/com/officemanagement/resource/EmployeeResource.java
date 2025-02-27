@@ -132,7 +132,7 @@ public class EmployeeResource {
             }
 
             // Check if seat is already occupied
-            if (seat.getEmployee() != null) {
+            if (seat.getEmployees() != null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Seat is already occupied").build();
             }
 
@@ -165,13 +165,8 @@ public class EmployeeResource {
                 return Response.status(Response.Status.NOT_FOUND).entity("Seat not found").build();
             }
 
-            // Check if this seat belongs to the employee
-            if (seat.getEmployee() == null || !seat.getEmployee().getId().equals(employeeId)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("This seat is not assigned to the employee").build();
-            }
-
             // Just set the employee reference to null instead of removing the seat
-            seat.setEmployee(null);
+            seat.setEmployees(null);
             session.update(seat);
             
             session.getTransaction().commit();
