@@ -111,7 +111,7 @@ INSERT INTO employees (full_name, occupation, created_at) VALUES
 ('Alessandro Ferrari', 'Security Systems Specialist', CURRENT_TIMESTAMP),
 ('Sofia Marino', 'Data Privacy Officer', CURRENT_TIMESTAMP),
 ('Lorenzo Romano', 'Full Stack Developer', CURRENT_TIMESTAMP),
-('Valentina Colombo', 'Systems Analyst', CURRENT_TIMESTAMP),
+('Valentina Lallero', 'Systems Analyst', CURRENT_TIMESTAMP),
 ('Luca Ricci', 'Database Administrator', CURRENT_TIMESTAMP),
 ('Matteo Greco', 'Cloud Infrastructure Engineer', CURRENT_TIMESTAMP),
 ('Chiara Esposito', 'Scrum Master', CURRENT_TIMESTAMP),
