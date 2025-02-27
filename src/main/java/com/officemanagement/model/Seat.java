@@ -28,13 +28,8 @@ public class Seat {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // @ManyToOne
-    // @JoinColumn(name = "employee_id")
-    // @JsonIgnoreProperties("seats")
-    // private Employee employee;
-
     @ManyToMany(mappedBy = "seats", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("seats") // Vermeidet Endlosschleifen
+    @JsonIgnoreProperties("seats")
     private Set<Employee> employees = new HashSet<>();
 
     // Add a convenience method to check if seat is occupied
@@ -76,11 +71,11 @@ public class Seat {
         this.createdAt = createdAt;
     }
 
-    public Set<Employee> getEmployees() {  // Ändere den Getter für die Many-to-Many-Beziehung
+    public Set<Employee> getEmployees() {  
         return employees;
     }
     
-    public void setEmployees(Set<Employee> employees) {  // Ändere den Setter entsprechend
+    public void setEmployees(Set<Employee> employees) { 
         this.employees = employees;
     }
 } 

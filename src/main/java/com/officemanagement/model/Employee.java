@@ -20,16 +20,13 @@ public class Employee {
 
     private String occupation;
 
-    // @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
-    // @JsonIgnoreProperties("employee")
-    // private Set<Seat> seats = new HashSet<>();
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)  
     @JoinTable(
         name = "employee_seats",
         joinColumns = @JoinColumn(name = "employee_id"),
         inverseJoinColumns = @JoinColumn(name = "seat_id")
     )
-    @JsonIgnoreProperties("employees") // Vermeidet Endlosschleifen bei JSON
+    @JsonIgnoreProperties("employees")
     private Set<Seat> seats = new HashSet<>();
 
 
