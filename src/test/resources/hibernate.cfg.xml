@@ -17,8 +17,8 @@
         <property name="hibernate.hbm2ddl.auto">create-drop</property>
 
         <!-- Echo all executed SQL to stdout -->
-        <property name="hibernate.show_sql">true</property>
-        <property name="hibernate.format_sql">true</property>
+        <!-- <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property> -->
 
         <!-- Use legacy ID generator mappings -->
         <property name="hibernate.id.new_generator_mappings">false</property>

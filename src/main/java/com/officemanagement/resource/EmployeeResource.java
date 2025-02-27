@@ -67,7 +67,6 @@ public class EmployeeResource {
             if (employee == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            System.out.println(employee.getSeats());
             return Response.ok(employee).build();
         }
     }
@@ -178,7 +177,6 @@ public class EmployeeResource {
             // Just set the employee reference to null instead of removing the seat
             // seat.setEmployee(null);
             employee.removeSeat(seat);
-            System.out.println(employee.getSeats()+" , "+seat.getEmployees()+" , "+seat.getEmployees().size());
             session.update(seat);
             
             session.getTransaction().commit();

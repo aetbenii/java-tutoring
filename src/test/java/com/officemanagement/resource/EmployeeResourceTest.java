@@ -132,10 +132,6 @@ public class EmployeeResourceTest extends BaseResourceTest {
         commitAndStartNewTransaction();
         flushAndClear();
 
-        // DEBUG 
-        System.out.println("Employee ID: " + employee.getId());
-        System.out.println("Seat ID: " + seat.getId());
-
         // Assign seat to employee
         given()
         .when()
