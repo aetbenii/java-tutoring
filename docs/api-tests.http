@@ -19,17 +19,17 @@ POST http://localhost:8080/api/floors
 Content-Type: application/json
 
 {
-    "name": "First Floor",
-    "floorNumber": 1
+    "name": "benjo",
+    "floorNumber": 77
 }
 
 ### Update floor
-PUT http://localhost:8080/api/floors/1
+PUT http://localhost:8080/api/floors/10
 Content-Type: application/json
 
 {
-    "name": "Updated First Floor",
-    "floorNumber": 1
+    "name": "Updated benjo",
+    "floorNumber": 78
 }
 
 ### Delete floor
@@ -135,7 +135,7 @@ Content-Type: application/json
 }
 
 ### Assign seat to employee
-PUT http://localhost:8080/api/employees/1/assign-seat/1
+PUT http://localhost:8080/api/employees/3/assign-seat/1
 # Adds the seat to employee's seats collection
 # Multiple seats can be assigned to the same employee
 # Multiple employees can be assigned to the same seat

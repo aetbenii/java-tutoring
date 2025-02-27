@@ -3,6 +3,9 @@ package com.officemanagement.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -25,16 +28,15 @@ public class Seat {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
+    @ManyToMany(mappedBy = "seats", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("seats")
-    private Employee employee;
+    private Set<Employee> employees = new HashSet<>();
 
     // Add a convenience method to check if seat is occupied
     @Transient
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public boolean isOccupied() {
-        return employee != null;
+        return employees != null;
     }
 
     public Long getId() {
@@ -69,11 +71,11 @@ public class Seat {
         this.createdAt = createdAt;
     }
 
-    public Employee getEmployee() {
-        return employee;
+    public Set<Employee> getEmployees() {  
+        return employees;
     }
-
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
+    
+    public void setEmployees(Set<Employee> employees) { 
+        this.employees = employees;
     }
 } 
