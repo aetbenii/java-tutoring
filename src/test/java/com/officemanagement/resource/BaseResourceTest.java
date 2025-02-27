@@ -113,6 +113,7 @@ public abstract class BaseResourceTest extends JerseyTest {
         session.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
         
         // Truncate all tables
+        session.createNativeQuery("DELETE FROM employee_seats").executeUpdate();
         session.createNativeQuery("TRUNCATE TABLE seats").executeUpdate();
         session.createNativeQuery("TRUNCATE TABLE employees").executeUpdate();
         session.createNativeQuery("TRUNCATE TABLE office_rooms").executeUpdate();
