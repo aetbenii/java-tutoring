@@ -36,6 +36,20 @@ public abstract class BaseResourceTest extends JerseyTest {
     protected Session session;
     protected Transaction transaction;
 
+    // Add a static shutdown hook to ensure SessionFactory is closed at JVM shutdown
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (sessionFactory != null && !sessionFactory.isClosed()) {
+                try {
+                    sessionFactory.close();
+                    System.out.println("SessionFactory closed by shutdown hook");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
+    }
+
     @BeforeAll
     public static void setupClass() {
         if (!initialized) {
@@ -51,8 +65,10 @@ public abstract class BaseResourceTest extends JerseyTest {
                 )
             );
             
-            // Initialize Hibernate
-            sessionFactory = HibernateUtil.getSessionFactory();
+            // Initialize Hibernate only once for all tests
+            if (sessionFactory == null || sessionFactory.isClosed()) {
+                sessionFactory = HibernateUtil.getSessionFactory();
+            }
             
             initialized = true;
         }
@@ -60,8 +76,8 @@ public abstract class BaseResourceTest extends JerseyTest {
 
     @AfterAll
     public static void tearDownClass() {
-        // Remove the sessionFactory.close() call from here
-        // The SessionFactory will be managed by the application lifecycle
+        // Do NOT close the SessionFactory here - it will be closed by the shutdown hook
+        // This ensures it remains open for all test classes
     }
 
     @Override
@@ -100,6 +116,11 @@ public abstract class BaseResourceTest extends JerseyTest {
         // Configure REST Assured logging
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         
+        // Reinitialize SessionFactory if closed 
+        if (sessionFactory == null || sessionFactory.isClosed()) {
+            sessionFactory = HibernateUtil.getSessionFactory();
+        }
+        
         // Start a new transaction
         session = sessionFactory.openSession();
         transaction = session.beginTransaction();
@@ -109,41 +130,54 @@ public abstract class BaseResourceTest extends JerseyTest {
     }
 
     private void cleanDatabase() {
-        // Disable foreign key checks temporarily
-        session.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-        
-        // Truncate all tables
-        session.createNativeQuery("TRUNCATE TABLE seats").executeUpdate();
-        session.createNativeQuery("TRUNCATE TABLE employees").executeUpdate();
-        session.createNativeQuery("TRUNCATE TABLE office_rooms").executeUpdate();
-        session.createNativeQuery("TRUNCATE TABLE floors").executeUpdate();
-        
-        // Reset sequences
-        session.createNativeQuery("ALTER SEQUENCE seat_seq RESTART WITH 1").executeUpdate();
-        session.createNativeQuery("ALTER SEQUENCE employee_seq RESTART WITH 1").executeUpdate();
-        session.createNativeQuery("ALTER SEQUENCE office_room_seq RESTART WITH 1").executeUpdate();
-        session.createNativeQuery("ALTER SEQUENCE floor_seq RESTART WITH 1").executeUpdate();
-        
-        // Re-enable foreign key checks
-        session.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
-        
-        // Commit the changes
-        transaction.commit();
-        transaction = session.beginTransaction();
+        try {
+            // Disable foreign key checks temporarily
+            session.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+            
+            // Truncate all tables
+            session.createNativeQuery("TRUNCATE TABLE seats").executeUpdate();
+            session.createNativeQuery("TRUNCATE TABLE employees").executeUpdate();
+            session.createNativeQuery("TRUNCATE TABLE office_rooms").executeUpdate();
+            session.createNativeQuery("TRUNCATE TABLE floors").executeUpdate();
+            
+            // Reset sequences
+            session.createNativeQuery("ALTER SEQUENCE seat_seq RESTART WITH 1").executeUpdate();
+            session.createNativeQuery("ALTER SEQUENCE employee_seq RESTART WITH 1").executeUpdate();
+            session.createNativeQuery("ALTER SEQUENCE office_room_seq RESTART WITH 1").executeUpdate();
+            session.createNativeQuery("ALTER SEQUENCE floor_seq RESTART WITH 1").executeUpdate();
+            
+            // Re-enable foreign key checks
+            session.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+            
+            // Commit the changes
+            transaction.commit();
+            transaction = session.beginTransaction();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
     @AfterEach
     public void cleanup() throws Exception {
         if (transaction != null && transaction.isActive()) {
             try {
-                transaction.commit();
+                transaction.rollback(); // Always rollback to ensure clean state
             } catch (Exception e) {
-                transaction.rollback();
-                throw e;
+                // Log the exception but continue with cleanup
+                System.err.println("Error during transaction rollback: " + e.getMessage());
             }
         }
         if (session != null && session.isOpen()) {
-            session.close();
+            try {
+                session.close();
+                session = null;
+            } catch (Exception e) {
+                // Log the exception but continue with cleanup
+                System.err.println("Error during session close: " + e.getMessage());
+            }
         }
         super.tearDown();
     }
@@ -154,8 +188,22 @@ public abstract class BaseResourceTest extends JerseyTest {
     }
 
     protected void commitAndStartNewTransaction() {
-        transaction.commit();
-        transaction = session.beginTransaction();
+        try {
+            if (transaction != null && transaction.isActive()) {
+                transaction.commit();
+            }
+            if (session != null && session.isOpen()) {
+                transaction = session.beginTransaction();
+            } else {
+                session = sessionFactory.openSession();
+                transaction = session.beginTransaction();
+            }
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 
     protected String getApiPath(String path) {
