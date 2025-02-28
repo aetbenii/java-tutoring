@@ -36,7 +36,7 @@ public class Seat {
     @Transient
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public boolean isOccupied() {
-        return employees != null;
+        return !employees.isEmpty();
     }
 
     public Long getId() {
