@@ -6,8 +6,12 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import java.io.File;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,6 +54,36 @@ public class FloorResource {
             return Response.ok(floor).build();
         }
     }
+
+@GET
+@Path("/{id}/svg")
+@Produces(MediaType.APPLICATION_XML)
+public Response getFloorPlan(@PathParam("id") Long id) {
+    try (Session session = sessionFactory.openSession()) {
+        String svgPath = session.createQuery(
+            "select f.svgPath from Floor f where f.id = :id", String.class)
+            .setParameter("id", id)
+            .uniqueResult();
+
+        if (svgPath == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        // Lade die SVG-Datei vom Dateisystem
+        java.nio.file.Path filePath = Paths.get(svgPath);
+        File file = filePath.toFile();
+
+        if (!file.exists() || !file.canRead()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        
+        return Response.ok(file)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=floor" + id + ".svg")
+                .build();
+    } catch (Exception e) {
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error loading SVG").build();
+    }
+}
 
     @POST
     public Response createFloor(Floor floor) {
