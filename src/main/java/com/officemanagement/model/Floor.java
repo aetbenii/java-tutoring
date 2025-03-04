@@ -20,8 +20,8 @@ public class Floor {
 
     private String name;
     
-    @Column(name = "svg_path")
-    private String svgPath;
+    @Column(name = "svg")
+    private String svg;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -64,12 +64,12 @@ public class Floor {
         this.name = name;
     }
 
-    public String getSvgPath() {
-        return svgPath; 
+    public String getSvg() {
+        return svg; 
     }
 
-    public void setSvgPath(String svgPath) {
-        this.svgPath = svgPath; 
+    public void setSvg(String svg) {
+        this.svg = svg; 
     }
 
     public LocalDateTime getCreatedAt() {
