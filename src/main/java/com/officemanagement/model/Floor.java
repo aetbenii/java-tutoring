@@ -19,6 +19,9 @@ public class Floor {
     private Integer floorNumber;
 
     private String name;
+    
+    @Column(name = "svg_path")
+    private String svgPath;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -59,6 +62,14 @@ public class Floor {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSvgPath() {
+        return svgPath; 
+    }
+
+    public void setSvgPath(String svgPath) {
+        this.svgPath = svgPath; 
     }
 
     public LocalDateTime getCreatedAt() {

@@ -61,16 +61,16 @@ CREATE TABLE employee_seats (
 
 -- Insert sample data in correct order
 -- 1. First, insert floors
-INSERT INTO floors (floor_number, name) VALUES
-(1, 'First Floor'),
-(2, 'Second Floor'),
-(3, 'Third Floor'),
-(4, 'Fourth Floor'),
-(5, 'Fifth Floor'),
-(6, 'Sixth Floor'),
-(7, 'Seventh Floor'),
-(8, 'Eighth Floor'),
-(9, 'Ninth Floor');
+INSERT INTO floors (floor_number, name, svg_path) VALUES
+(1, 'First Floor', '.devcontainer/svg/output.svg'),
+(2, 'Second Floor','.devcontainer/svg/output.svg'),
+(3, 'Third Floor','.devcontainer/svg/output.svg'),
+(4, 'Fourth Floor','.devcontainer/svg/output.svg'),
+(5, 'Fifth Floor','.devcontainer/svg/output.svg'),
+(6, 'Sixth Floor','.devcontainer/svg/output.svg'),
+(7, 'Seventh Floor','.devcontainer/svg/output.svg'),
+(8, 'Eighth Floor','.devcontainer/svg/output.svg'),
+(9, 'Ninth Floor','.devcontainer/svg/output.svg');
 
 -- 2. Then, insert rooms for each floor
 DO $$
