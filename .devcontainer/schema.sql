@@ -26,6 +26,7 @@ CREATE TABLE floors (
     id BIGINT DEFAULT nextval('floor_seq') PRIMARY KEY,
     floor_number INTEGER NOT NULL,
     name VARCHAR(255),
+    floor_plan TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -186,4 +187,39 @@ INSERT INTO employees (full_name, occupation, created_at) VALUES
 ('Kurt Frank', 'Technical Support Lead', CURRENT_TIMESTAMP),
 ('Günther Berger', 'Systems Administrator', CURRENT_TIMESTAMP),
 ('Ludwig Kaiser', 'Network Operations Engineer', CURRENT_TIMESTAMP),
-('Helmut Schuster', 'IT Auditor', CURRENT_TIMESTAMP); 
+('Helmut Schuster', 'IT Auditor', CURRENT_TIMESTAMP);
+
+-- Create a temporary table for loading SVG content
+CREATE TABLE IF NOT EXISTS temp_svg_loader (
+    id SERIAL PRIMARY KEY,
+    svg_content TEXT,
+    is_base64 BOOLEAN DEFAULT FALSE
+);
+
+-- Function to update floor plan from the temporary table
+CREATE OR REPLACE FUNCTION update_floor_plan(floor_id BIGINT)
+RETURNS VOID AS $$
+DECLARE
+    svg_data TEXT;
+    is_encoded BOOLEAN;
+BEGIN
+    -- Get the latest SVG content and encoding flag
+    SELECT svg_content, is_base64 INTO svg_data, is_encoded
+    FROM temp_svg_loader 
+    ORDER BY id DESC 
+    LIMIT 1;
+    
+    -- If the content is base64 encoded, decode it
+    IF is_encoded THEN
+        svg_data := convert_from(decode(svg_data, 'base64'), 'UTF8');
+    END IF;
+    
+    -- Update the floor record with the SVG content
+    UPDATE floors
+    SET floor_plan = svg_data
+    WHERE id = floor_id;
+    
+    -- Clean up the temporary table
+    DELETE FROM temp_svg_loader;
+END;
+$$ LANGUAGE plpgsql; 
