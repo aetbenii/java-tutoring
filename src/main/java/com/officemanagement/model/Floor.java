@@ -20,7 +20,7 @@ public class Floor {
 
     private String name;
     
-    @Column(name = "svg")
+    @Column(name = "floor_plan")
     private String svg;
 
     @Column(name = "created_at")
