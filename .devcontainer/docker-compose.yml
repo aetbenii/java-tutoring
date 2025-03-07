@@ -7,6 +7,9 @@ services:
       - ..:/workspaces/tutoring:cached
     command: sleep infinity
     network_mode: service:db
+    user: devbox
+    environment:
+      - USER=devbox
     depends_on:
       db:
         condition: service_healthy
