@@ -6,8 +6,12 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import java.io.File;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,6 +54,27 @@ public class FloorResource {
             return Response.ok(floor).build();
         }
     }
+
+@GET
+@Path("/{id}/svg")
+@Produces(MediaType.APPLICATION_XML)
+public Response getFloorPlan(@PathParam("id") Long id) {
+    try (Session session = sessionFactory.openSession()) {
+        String svg = session.createQuery(
+        "select f.svg from Floor f where f.id = :id", String.class)
+        .setParameter("id", id)
+        .uniqueResult();
+
+if (svg == null || svg.isEmpty()) {
+    return Response.status(Response.Status.NOT_FOUND).build();
+}
+
+return Response.ok(svg)
+        .type("image/svg+xml")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=floor" + id + ".svg")
+        .build();
+    }
+}
 
     @POST
     public Response createFloor(Floor floor) {
