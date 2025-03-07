@@ -24,5 +24,5 @@
     }
   },
   "remoteUser": "devbox",
-  "postCreateCommand": "chmod +x .devcontainer/load_floor_plan.sh .devcontainer/load_example_data.sh && .devcontainer/load_example_data.sh"
+  "postCreateCommand": "sudo chmod +x .devcontainer/load_floor_plan.sh .devcontainer/load_example_data.sh && .devcontainer/load_example_data.sh"
 }
