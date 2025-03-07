@@ -24,5 +24,5 @@
     }
   },
   "remoteUser": "devbox",
-  "postCreateCommand": "until pg_isready -h db -U postgres; do sleep 1; done && PGPASSWORD=postgres psql -h db -U postgres -f .devcontainer/schema.sql"
+  "postCreateCommand": "chmod +x .devcontainer/load_floor_plan.sh .devcontainer/load_example_data.sh && .devcontainer/load_example_data.sh"
 }
