@@ -1,5 +1,6 @@
 package com.officemanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class Floor {
     private String name;
     
     @Column(name = "floor_plan")
+    @JsonIgnore
     private String svg;
 
     @Column(name = "created_at")

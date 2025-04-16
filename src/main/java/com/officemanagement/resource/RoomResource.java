@@ -11,7 +11,12 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -96,6 +101,20 @@ public class RoomResource {
             if (room == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+             // Deduplizieren der Sitze basierend auf ID
+        Set<Long> processedSeatIds = new HashSet<>();
+        List<Seat> uniqueSeats = new ArrayList<>();
+        
+        for (Seat seat : new ArrayList<>(room.getSeats())) {
+            if (!processedSeatIds.contains(seat.getId())) {
+                processedSeatIds.add(seat.getId());
+                uniqueSeats.add(seat);
+            }
+        }
+        
+        // Ersetzen der Liste mit Duplikaten durch die deduplizierte Liste
+        room.setSeats(uniqueSeats);
             
             return Response.ok(room).build();
         }
@@ -219,5 +238,160 @@ public class RoomResource {
             
             return Response.noContent().build();
         }
+    }
+
+    @PATCH
+    @Path("/{id}/geometry")
+    public Response updateRoomGeometry(@PathParam("id") Long id, Map<String, Object> geometryData) {
+        Session session = null;
+        org.hibernate.Transaction transaction = null;
+        
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            
+            // Check if room exists
+            OfficeRoom room = session.get(OfficeRoom.class, id);
+            if (room == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Room not found")
+                    .build();
+            }
+            
+            // Update room geometry
+            updateGeometryProperties(room, geometryData);
+            session.update(room);
+            
+            // Check if seat geometries were provided
+            if (geometryData.containsKey("seats") && geometryData.get("seats") instanceof Map) {
+                Map<?, ?> seatsMap = (Map<?, ?>) geometryData.get("seats");
+                
+                // Process each seat
+                for (Map.Entry<?, ?> entry : seatsMap.entrySet()) {
+                    if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof Map)) {
+                        continue; // Skip invalid entries
+                    }
+                    
+                    String seatIdStr = (String) entry.getKey();
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> seatGeometry = (Map<String, Object>) entry.getValue();
+                    
+                    Long seatId;
+                    try {
+                        seatId = Long.parseLong(seatIdStr);
+                    } catch (NumberFormatException e) {
+                        continue; // Skip invalid seat IDs
+                    }
+                    
+                    // Find the seat and verify it belongs to this room
+                    Seat seat = session.get(Seat.class, seatId);
+                    if (seat != null && seat.getRoom().getId().equals(id)) {
+                        // Update seat geometry
+                        updateGeometryProperties(seat, seatGeometry);
+                        session.update(seat);
+                    }
+                }
+            }
+            
+            transaction.commit();
+            
+            // Query the room again to return fresh data
+            OfficeRoom updatedRoom = session.createQuery(
+                "SELECT r FROM OfficeRoom r WHERE r.id = :id", OfficeRoom.class)
+                .setParameter("id", id)
+                .uniqueResult();
+                
+            // Create a simplified response object to:
+            // 1. Prevent serialization cycles in bidirectional relationships
+            // 2. Control the exact shape of the API response
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", updatedRoom.getId());
+            response.put("name", updatedRoom.getName());
+            response.put("roomNumber", updatedRoom.getRoomNumber());
+            response.put("x", updatedRoom.getX());
+            response.put("y", updatedRoom.getY());
+            response.put("width", updatedRoom.getWidth());
+            response.put("height", updatedRoom.getHeight());
+            
+            // Query the seats separately to ensure all data is loaded before session closes
+            // This prevents LazyInitializationException when accessing the collection later
+            Set<Seat> seats = session.createQuery(
+                "SELECT s FROM Seat s WHERE s.room.id = :roomId", Seat.class)
+                .setParameter("roomId", id)
+                .getResultList()
+                .stream()
+                .collect(java.util.stream.Collectors.toSet());
+                
+            if (seats != null && !seats.isEmpty()) {
+                // Add seat IDs to the response
+                response.put("seats", seats.size());
+            }
+            
+            return Response.ok(response).build();
+            
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Error updating geometry: " + e.getMessage())
+                .build();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+    }
+    
+    /**
+     * Helper method to extract a float value from a geometry data map
+     */
+    private Float getFloatValue(Map<String, Object> geometryData, String key) {
+        if (!geometryData.containsKey(key)) {
+            return null;
+        }
+        
+        Object value = geometryData.get(key);
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+        return null;
+    }
+    
+    /**
+     * Update geometry properties for a room
+     */
+    private void updateGeometryProperties(OfficeRoom room, Map<String, Object> geometryData) {
+        Float x = getFloatValue(geometryData, "x");
+        if (x != null) room.setX(x);
+        
+        Float y = getFloatValue(geometryData, "y");
+        if (y != null) room.setY(y);
+        
+        Float width = getFloatValue(geometryData, "width");
+        if (width != null) room.setWidth(width);
+        
+        Float height = getFloatValue(geometryData, "height");
+        if (height != null) room.setHeight(height);
+    }
+    
+    /**
+     * Update geometry properties for a seat
+     */
+    private void updateGeometryProperties(Seat seat, Map<String, Object> geometryData) {
+        Float x = getFloatValue(geometryData, "x");
+        if (x != null) seat.setX(x);
+        
+        Float y = getFloatValue(geometryData, "y");
+        if (y != null) seat.setY(y);
+        
+        Float width = getFloatValue(geometryData, "width");
+        if (width != null) seat.setWidth(width);
+        
+        Float height = getFloatValue(geometryData, "height");
+        if (height != null) seat.setHeight(height);
+        
+        Float rotation = getFloatValue(geometryData, "rotation");
+        if (rotation != null) seat.setRotation(rotation);
     }
 } 

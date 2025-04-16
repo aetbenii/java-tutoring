@@ -25,6 +25,18 @@ public class Seat {
     @Column(name = "seat_number", nullable = false)
     private String seatNumber;
 
+    @Column(name = "x", nullable = false, columnDefinition = "FLOAT DEFAULT 0")
+    private float x;
+
+    @Column(name = "y", nullable = false, columnDefinition = "FLOAT DEFAULT 0")
+    private float y;
+
+    private float width;
+
+    private float height;
+
+    private float rotation;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -63,6 +75,47 @@ public class Seat {
         this.seatNumber = seatNumber;
     }
 
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
+    }
+
+    // Setter
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setWidth(float width) {
+        this.width = width;
+    }
+
+    public void setHeight(float height) {
+        this.height = height;
+    }
+
+    public float getRotation(){
+        return rotation;
+    }
+
+    public void setRotation(float rotation){
+        this.rotation = rotation;
+    }
+    
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

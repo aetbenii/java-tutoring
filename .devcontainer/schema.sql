@@ -34,6 +34,10 @@ CREATE TABLE office_rooms (
     id BIGINT DEFAULT nextval('office_room_seq') PRIMARY KEY,
     room_number VARCHAR(255) NOT NULL,
     name VARCHAR(255),
+    x FLOAT DEFAULT 0, 
+    y FLOAT DEFAULT 0,
+    width FLOAT NOT NULL,
+    height FLOAT NOT NULL,
     floor_id BIGINT REFERENCES floors(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -48,6 +52,11 @@ CREATE TABLE employees (
 CREATE TABLE seats (
     id BIGINT DEFAULT nextval('seat_seq') PRIMARY KEY,
     seat_number VARCHAR(255) NOT NULL,
+    x FLOAT DEFAULT 0, 
+    y FLOAT DEFAULT 0,
+    width FLOAT NOT NULL,
+    height FLOAT NOT NULL,
+    rotation FLOAT DEFAULT 0,
     room_id BIGINT REFERENCES office_rooms(id),
     employee_id BIGINT REFERENCES employees(id), -- add UNIQUE if the employee can only have one seat
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -81,11 +90,13 @@ BEGIN
     LOOP
         FOR room_num IN 1..20
         LOOP
-            INSERT INTO office_rooms (room_number, name, floor_id)
+            INSERT INTO office_rooms (room_number, name, floor_id, width, height)
             VALUES (
                 CONCAT(floor_record.floor_number, LPAD(room_num::text, 2, '0')),
                 CONCAT('Room ', floor_record.floor_number, LPAD(room_num::text, 2, '0')),
-                floor_record.id
+                floor_record.id,
+                250,
+                400
             );
         END LOOP;
     END LOOP;
@@ -100,10 +111,12 @@ BEGIN
     LOOP
         FOR seat_num IN 1..4
         LOOP
-            INSERT INTO seats (seat_number, room_id)
+            INSERT INTO seats (seat_number, room_id, height, width)
             VALUES (
                 CONCAT(room_record.room_number, '-', LPAD(seat_num::text, 2, '0')),
-                room_record.id
+                room_record.id,
+                100,
+                50
             );
         END LOOP;
     END LOOP;
