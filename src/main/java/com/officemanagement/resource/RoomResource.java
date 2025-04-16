@@ -7,12 +7,13 @@ import com.officemanagement.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import javax.transaction.Transaction;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,6 +101,20 @@ public class RoomResource {
             if (room == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+             // Deduplizieren der Sitze basierend auf ID
+        Set<Long> processedSeatIds = new HashSet<>();
+        List<Seat> uniqueSeats = new ArrayList<>();
+        
+        for (Seat seat : new ArrayList<>(room.getSeats())) {
+            if (!processedSeatIds.contains(seat.getId())) {
+                processedSeatIds.add(seat.getId());
+                uniqueSeats.add(seat);
+            }
+        }
+        
+        // Ersetzen der Liste mit Duplikaten durch die deduplizierte Liste
+        room.setSeats(uniqueSeats);
             
             return Response.ok(room).build();
         }
